@@ -1,66 +1,138 @@
 # Budget Tracker
-Demo: https://drive.google.com/file/d/1u4Xi7LyFolyvbTISa3t1ZhibPslgZPAz/view?usp=sharing
-#### Description:
 
-In today's fast-paced world, efficient financial management is essential. Having a solid system in place may be quite beneficial, whether you're tracking personal spending or controlling the finances of your business. The Budget Tracker online application can help with that. This application, built on the Flask framework, has a simple user interface and powerful to help you with your financial management.
+A full-stack Flask web application for tracking personal income and expenses, 
+with monthly summaries, category breakdowns, and interactive pie chart 
+visualization. Each user has a private account with their own transaction 
+history.
+
+[Watch the demo video](https://drive.google.com/file/d/1u4Xi7LyFolyvbTISa3t1ZhibPslgZPAz/view?usp=sharing)
+
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+![Flask](https://img.shields.io/badge/flask-000000?style=for-the-badge&logo=flask&logoColor=white)
+![SQLAlchemy](https://img.shields.io/badge/sqlalchemy-D71F00?style=for-the-badge&logo=sqlalchemy&logoColor=white)
+![SQLite](https://img.shields.io/badge/sqlite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
+![Bootstrap](https://img.shields.io/badge/bootstrap-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)
+![Chart.js](https://img.shields.io/badge/chart.js-FF6384?style=for-the-badge&logo=chart.js&logoColor=white)
+
+## Overview
+
+Users register, log in securely, and add income or expense transactions 
+categorized across 11 predefined categories (Housing, Transportation, Food, 
+etc.). The home dashboard shows real-time monthly totals and a pie chart 
+breaking down expenses by category. Each user's data is fully isolated 
+through database-level foreign key relationships.
 
 ## Features
 
-### User Authentication
+- **Secure authentication** — Email and password with pbkdf2:sha256 hashing (Werkzeug)
+- **User-scoped data** — Foreign key relationships ensure users only see their own transactions
+- **Income and expense tracking** — Add transactions with amount, month, and category
+- **Monthly dashboard** — Select any month to see total earned, total spent, and budget remaining
+- **Interactive pie chart** — Expenses by category, regenerated dynamically when the user changes month (Chart.js + AJAX)
+- **Transaction history** — Full chronological list with delete functionality
+- **Server-side validation** — Empty fields, invalid amounts, password length, duplicate emails all caught with flash messages
+- **Responsive design** — Bootstrap 4 layout works across desktop, tablet, mobile
 
-- User authentication features are provided by the Budget Tracker online application, guaranteeing the safety and security of user accounts. 
-- Users can log in with their email address and password or create a new account.
+## Tech Stack
 
-#### Account Creation
+- **Backend:** Python, Flask, Flask-Login, Flask-SQLAlchemy
+- **Database:** SQLite (via SQLAlchemy ORM)
+- **Authentication:** Werkzeug security (`generate_password_hash`, `check_password_hash`)
+- **Frontend:** HTML, Jinja2 templating, Bootstrap 4, custom CSS
+- **Visualization:** Chart.js
+- **AJAX:** Native `fetch` API for dashboard updates
 
-- By entering email address and selecting a secure password, new users can quickly create an account.
-- The Werkzeug library, a popular Python password hashing package, is used to safely hash passwords. By doing this, it is made sure that passwords are kept in the database and hidden from view by administrators as well.
+## Architecture
 
-#### Secure Login
+The app uses a professional Flask structure:
 
-- After creating an account, users can sign in with their password and email address.
-- In order to reduce the possibility of unwanted access, the program uses secure authentication methods to confirm the user's credentials.
+- **Application factory pattern** — `create_app()` function in `website/__init__.py` for initialization and testability
+- **Blueprint architecture** — Routes split into `views` (main app) and `auth` (login/signup/logout) blueprints
+- **ORM models** — `User` and `Transaction` defined with SQLAlchemy in `models.py`, with foreign key relationship
+- **Decorator-based access control** — Routes protected with `@login_required` from Flask-Login
+- **Server-rendered + AJAX hybrid** — Pages rendered with Jinja2 templates, dashboard updates use JSON endpoints
+- **Environment-based secrets** — `SECRET_KEY` loaded from environment variable with a development fallback
 
-### Transaction Management
+## Project Structure
 
-Whether tracking revenue or keeping track of spending, the Budget Tracker program gives customers the ability to handle their financial operations.
+```plaintext
+budget-tracker/
+├── website/
+│   ├── __init__.py        #App factory, blueprint registration, DB setup, login manager
+│   ├── auth.py            #Login, signup, logout routes (auth blueprint)
+│   ├── views.py           #Home, expenses, income, history routes (views blueprint)
+│   ├── models.py          #User and Transaction SQLAlchemy models
+│   ├── static/
+│   │   └── styles.css     #Custom theme on top of Bootstrap
+│   └── templates/
+│       ├── index.html     #Base template with navbar, flash messages, Chart.js CDN
+│       ├── login.html     #Landing page with Login / Sign up buttons
+│       ├── login_page.html
+│       ├── signup.html
+│       ├── home.html      #Dashboard with month selector and pie chart
+│       ├── expenses.html  #Form to add expense transactions
+│       ├── income.html    #Form to add income transactions
+│       └── history.html   #Chronological transaction list with delete
+├── main.py                #Entry point
+└── database.db            #SQLite database (auto-generated on first run)
+```
 
-#### Adding Transactions
+## Running the App
 
-- It is simple for users to add new income transactions or expenses. All they have to do is mention the transaction's amount, category, and month.
-- In order to ensure appropriate spending categorization, customers can select from predefined categories when entering expenses, including housing, transportation, food, healthcare, entertainment, and more.
-- Users can see their transaction history at any moment thanks to the database's storage of transactions.
+**Prerequisites:** Python 3.8+
 
-#### Viewing Transaction History
+```bash
+#Clone the repository
+git clone https://github.com/tislova/budget-tracker.git
+cd budget-tracker
 
-- Consumers have access to their transaction history, which offers an extensive overview of all of their financial transactions.  
-- Users can track their revenue and expenses over time by viewing important facts about their transactions, including the month, amount, category, and kind of transaction (income or expense).
+#Install dependencies
+pip install flask flask-sqlalchemy flask-login werkzeug
 
-### Responsive Design
+#Run the app
+python main.py
+```
 
-The adaptable design of the Expense Tracker online application offers a smooth user experience on a variety of screens and devices.
+The app will be available at `http://localhost:5000`. The SQLite database 
+is created automatically on first launch.
 
-#### Bootstrap Integration
+**For production deployments:** set the `SECRET_KEY` environment variable to 
+a secure random value before running:
 
-- Bootstrap, a popular front-end framework, is used to design a responsive and visually appealing user interface.
-- Desktops, laptops, tablets, and smartphones may all use the application because of its optimal layout and style.
+```bash
+export SECRET_KEY="$(python -c 'import secrets; print(secrets.token_hex(32))')"
+python main.py
+```
 
-### Data Visualization
+## Key Code Decisions
 
-The Budget Tracker application's home page offers customers informative data visualization elements that improve their understanding of their financial situation.
+- **Application factory** — Using `create_app()` instead of a top-level `app = Flask(__name__)` makes the app testable and supports multiple configurations (dev/prod).
+- **Blueprints** — Splitting auth and main routes into separate modules keeps `views.py` focused on business logic.
+- **User-scoped queries** — Every transaction query filters by `user_id=current_user.id`, ensuring data isolation between users.
+- **JSON endpoint for dashboard** — The `/` POST handler returns JSON instead of rendering HTML, enabling the dynamic pie chart updates without page reloads.
+- **Environment-based secrets** — `SECRET_KEY` is pulled from `os.environ` with a development fallback, so the app runs locally without setup while still supporting secure production deployment.
 
-#### Summary of Financial Metrics
+## Skills Demonstrated
 
-- On the home page, users may see a summary of their total earnings, total expenses, and remaining budget for the chosen month. 
-- By giving consumers a brief summary of their financial condition, these metrics assist users in making wise choices regarding their spending and saving practices.
+- **Full-stack Flask development** — Routes, templates, forms, database integration
+- **Authentication and security** — Password hashing, session management, login-required decorators
+- **Secrets management** — Environment-variable configuration with safe development fallback
+- **Relational database design** — User and Transaction tables with foreign key relationship
+- **ORM usage** — SQLAlchemy models, queries, filtering, ordering
+- **Blueprint-based modularization** — Clean separation of concerns
+- **Application factory pattern** — Professional Flask project structure
+- **Server-side validation** — Input checking with user-friendly flash messages
+- **AJAX with fetch API** — Dynamic dashboard updates without page reload
+- **Data visualization** — Chart.js pie chart with dynamic data binding
+- **Responsive design** — Bootstrap 4, custom CSS
 
+## What I'd Add With More Time
 
-#### Pie Chart Representation
-
-- In addition, a pie chart provides customers with a straightforward visual representation of their spending patterns by displaying expenses by category.
-- The pie chart shows categories including housing, transportation, food, entertainment, and healthcare, enabling users to pinpoint areas where they might need to make adjustments.
-
-
-## Conclusion 
-
-Budget Tracker is an online application that simplifies money management duties for both individuals and enterprises. Its features include robust user identification, complete transaction management, flexible design, and analytical data visualization. Whether you're keeping track of personal spending or managing business money, the Budget Tracker gives you the power to take charge of your financial future.
+- Add a `requirements.txt` for reproducible installs
+- Export transactions to CSV
+- Add budget targets per category with overspend warnings
+- Multi-currency support
+- Recurring transactions (rent, subscriptions, salary)
+- Year-over-year comparison view
+- Unit tests for the helper logic and integration tests for auth flow
+- Migrate to PostgreSQL for production deployment

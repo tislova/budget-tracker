@@ -1,5 +1,7 @@
 # Budget Tracker
 
+![Demo](Demo.gif)
+
 A full-stack Flask web application for tracking personal income and expenses, 
 with monthly summaries, category breakdowns, and interactive pie chart 
 visualization. Each user has a private account with their own transaction 

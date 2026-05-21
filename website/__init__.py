@@ -1,5 +1,6 @@
 from flask import Flask, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+import os
 from os import path
 from flask_login import LoginManager, user_unauthorized
 
@@ -9,7 +10,7 @@ DB_NAME = "database.db"
 
 def create_app():
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = ''
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-fallback-key-not-for-production')
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
     db.init_app(app)
 
